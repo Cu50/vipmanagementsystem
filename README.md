@@ -1,6 +1,6 @@
 # vipmanagementsystem
 webhomework
-##Modal　本当にいい
+##　Modal本当にいい
 ありがとうございました。
 まだね～～
 ハハハハハ
