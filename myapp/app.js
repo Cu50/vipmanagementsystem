@@ -96,6 +96,7 @@ app.get('/foodU/:id/:name/:star/:address/:store/:suggestion',(req , res , next) 
   })
 })
 
+
 app.post("/vipregister", (req, res) => {
 
   const vip_name = req.body.vip_name;
@@ -137,6 +138,23 @@ app.get('/vip', function (req, res,next) {
     res.end(result);
   })
 }) 
+app.post('/vip_count', function (req, res,next) {
+  const vip_name = req.body.vip_name;
+  Vipconnection.query('SELECT vip_count.vip_count_present,vip_count.vip_count from vip_count ,vip_init WHERE vip_init.vip_count>=vip_count.vip_count and vip_name=?',[vip_name],  (err, Result) => {
+    if (err) throw err
+    result=JSON.stringify(Result);
+    res.end(result);
+  })
+})
+app.post('/vipcountchange', function (req, res, next) {
+  const vip_name = req.body.vip_name;
+  const count = req.body.count;
+  Vipconnection.query(`UPDATE vip_init SET vip_count = vip_count - ? WHERE vip_name = ?`,[count,vip_name], (err, Result) => {
+    if (err) throw err
+    result=JSON.stringify(Result);
+    res.send(Result);
+  })
+}) 
 app.post('/vipinfo', function (req, res, next) {
   const vip_name = req.body.vip_name;
   console.log(vip_name);
@@ -144,7 +162,7 @@ app.post('/vipinfo', function (req, res, next) {
   console.log(vip_name);
   Vipconnection.query(`SELECT * From vip_init WHERE vip_name = ?`,[vip_name], (err, Result) => {
     if (err) throw err
-    /* result=JSON.stringify(Result); */
+    result=JSON.stringify(Result);
     res.send(Result);
   })
 }) 
@@ -168,11 +186,21 @@ app.post('/vip_course_count', function (req, res,next) {
     res.send(Result);
   })
 }) 
+app.post('/viplevelupdate', function (req, res,next) {
+  const vip_name = req.body.vip_name;
+  console.log("shabi");
+  console.log(vip_name);
+  Vipconnection.query(`UPDATE vip_init set vip_level=(select vip_level from vip_level_name where (SELECT COUNT(lession_id) from vip_course WHERE vip_name=?) BETWEEN vip_level_name.vip_course_low and  vip_level_name.vip_course_high) where vip_name=?`,[vip_name,vip_name], (err, Result) => {
+    if (err) throw err
+    /* result=JSON.stringify(Result); */
+    res.send(Result);
+  })
+}) 
 
 app.post('/vipSelectCourse', function (req, res,next) {
   const vip_name = req.body.vip_name;
   console.log(vip_name);
-  Vipconnection.query(`SELECT lession_id,lession_name,teacher_name from lession  NATURAL JOIN teacher where lession_id not in ( SELECT lession_id from vip_course where vip_name = ? ) `,[vip_name], (err, Result) => {
+  Vipconnection.query(`SELECT lession_id,lession_name,lession_score,teacher_name from lession  NATURAL JOIN teacher where lession_id not in ( SELECT lession_id from vip_course where vip_name = ? ) `,[vip_name], (err, Result) => {
     if (err) throw err
     /* result=JSON.stringify(Result); */
     res.send(Result);
@@ -205,7 +233,8 @@ app.post('/vipCourse', function (req, res,next) {
   Vipconnection.query(`SELECT
 	vip_course.number, 
 	vip_course.lession_id, 
-	lession.lession_name
+	lession.lession_name,
+  lession.lession_score
 FROM
 	vip_course
 	INNER JOIN
