@@ -176,6 +176,16 @@ app.post('/vip/:id', function (req, res,next) {
     res.send(Result);
   })
 }) 
+app.post('/viplevelname', function (req, res,next) {
+  const vip_name = req.body.vip_name;
+  console.log("shabi");
+  console.log(vip_name);
+  Vipconnection.query(`SELECT name from vip_init NATURAL JOIN vip_level_name WHERE vip_name = ?`,[vip_name], (err, Result) => {
+    if (err) throw err
+    /* result=JSON.stringify(Result); */
+    res.send(Result);
+  })
+}) 
 app.post('/vip_course_count', function (req, res,next) {
   const vip_name = req.body.vip_name;
   console.log("shabi");
